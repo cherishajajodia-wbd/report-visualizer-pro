@@ -1,0 +1,96 @@
+{
+  "result_type": "ListTitleRights",
+  "exact_missing": [
+    ["season_name", null, "season 6"],
+    ["episode_count", null, "13"],
+    ["genre", null, "Reality TV"]
+  ],
+  "fuzzy_missing": [
+    ["result_type", null, "listtitlerights"],
+    ["platform", null, "streaming"]
+  ],
+  "embedding_results": [
+    {
+      "fact": "The season_name is season 6.",
+      "score": 0.9391,
+      "present": true
+    },
+    {
+      "fact": "The program_name is Dirty Jobs.",
+      "score": 0.8765,
+      "present": true
+    },
+    {
+      "fact": "The title_source is WBD Catalog.",
+      "score": 0.7234,
+      "present": true
+    },
+    {
+      "fact": "The episode_count is 13.",
+      "score": 0.5432,
+      "present": false
+    },
+    {
+      "fact": "The genre is Reality TV.",
+      "score": 0.4567,
+      "present": false
+    }
+  ],
+  "timeline_issues": [
+    "Episode air dates are inconsistent with season timeline",
+    "Missing premiere date for season 6"
+  ],
+  "media_type_issues": [
+    "Video format specification missing for some episodes",
+    "Audio codec information incomplete"
+  ],
+  "qa_results": [
+    {
+      "fact": "season_name: season 6",
+      "question": "What is the season name?",
+      "qa_answer": "season 6",
+      "score": 0.9068,
+      "supported": true
+    },
+    {
+      "fact": "program_name: Dirty Jobs",
+      "question": "What is the program name?",
+      "qa_answer": "Dirty Jobs",
+      "score": 0.8876,
+      "supported": true
+    },
+    {
+      "fact": "title_source: WBD Catalog",
+      "question": "What is the title source?",
+      "qa_answer": "WBD Catalog",
+      "score": 0.7654,
+      "supported": true
+    },
+    {
+      "fact": "episode_count: 13",
+      "question": "How many episodes are there?",
+      "qa_answer": "12",
+      "score": 0.5432,
+      "supported": false
+    },
+    {
+      "fact": "genre: Reality TV",
+      "question": "What is the genre?",
+      "qa_answer": "Documentary",
+      "score": 0.4321,
+      "supported": false
+    }
+  ],
+  "summac_score": 0.8928,
+  "intent_scores": {
+    "chunks": [
+      "- program_name: Dirty Jobs\n- title_source: WBD Catalog\n- season_name: season 6\n- episode_count: 13\n- genre: Reality TV\n- original_air_date: 2010-2011\n- host: Mike Rowe\n- network: Discovery Channel",
+      "- format: Documentary Series\n- target_audience: General Audience\n- content_rating: TV-PG\n- production_company: Craig Piligian Productions\n- distribution_rights: Warner Bros. Discovery\n- availability: Streaming and Broadcast",
+      "- episode_runtime: 60 minutes\n- season_premiere: October 2010\n- season_finale: April 2011\n- total_seasons: 9\n- status: Concluded\n- awards: Emmy nominations\n- international_distribution: Yes"
+    ],
+    "embedding_scores": [0.8459, 0.7823, 0.7156],
+    "max_embedding_score": 0.8459,
+    "reranker_scores": [0.9584, 0.8765, 0.8234],
+    "max_reranker_score": 0.9584
+  }
+}
