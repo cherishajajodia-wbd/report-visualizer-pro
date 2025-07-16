@@ -8,15 +8,17 @@ A modern web application built with Vite, React, TypeScript, shadcn-ui, and Tail
 
 - [Project Info](#project-info)
 - [How to Edit This Code](#how-to-edit-this-code)
-- [Technologies Used](#technologies-used)
-- [How to Deploy](#how-to-deploy)
-- [Custom Domain Setup](#custom-domain-setup)
+  - [Clone and Edit Locally](#clone-and-edit-locally)
+  - [Technologies Used](#technologies-used)
+  - [How to Deploy](#how-to-deploy)
+  - [Edit Files Directly on GitHub](#edit-files-directly-on-github)
+  - [Use GitHub Codespaces (Optional)](#use-github-codespaces-optional)
 
 ---
 
 ## Project Info
 
-Welcome to your project! This is your starting point for building, editing, and deploying your web application.
+Report Visualizer Pro is a project that allows you to upload your result JSON file, summarizes the data, and displays it in a dashboard with various insightful parameters. It’s designed to make your data easy to explore and understand with interactive visualizations.
 
 ---
 
@@ -24,7 +26,7 @@ Welcome to your project! This is your starting point for building, editing, and 
 
 There are several ways you can work on your application:
 
-### 1. Clone and Edit Locally
+### Clone and Edit Locally
 
 Make sure you have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed.
 
