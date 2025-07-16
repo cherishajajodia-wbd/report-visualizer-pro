@@ -33,6 +33,9 @@ interface ValidationData {
     reranker_scores: number[];
     max_reranker_score: number;
   };
+  user_prompt?: string;
+  sql_facts_extracted?: string | string[];
+  llm_summary_generated?: string;
 }
 
 interface ValidationReportViewerProps {
@@ -43,13 +46,13 @@ interface ValidationReportViewerProps {
 const ScoreBadge = ({ score }: { score: number }) => {
   const getScoreColor = (score: number) => {
     if (score >= 0.8) return "bg-gradient-success text-success-foreground";
-    if (score >= 0.6) return "bg-gradient-warning text-warning-foreground";
+    if (score >= 0.5) return "bg-gradient-warning text-warning-foreground";
     return "bg-gradient-danger text-danger-foreground";
   };
 
   const getScoreLabel = (score: number) => {
     if (score >= 0.8) return "High";
-    if (score >= 0.6) return "Medium";
+    if (score >= 0.5) return "Medium";
     return "Low";
   };
 
@@ -99,6 +102,9 @@ const PresentBadge = ({ present }: { present: boolean }) => {
 const ValidationReportViewer = ({ data, onClose }: ValidationReportViewerProps) => {
   const [expandedChunks, setExpandedChunks] = useState<Set<number>>(new Set());
   const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [showSQLFacts, setShowSQLFacts] = useState(false);
+  const [showLLMSummary, setShowLLMSummary] = useState(false);
 
   const toggleChunk = (index: number) => {
     const newExpanded = new Set(expandedChunks);
@@ -182,7 +188,7 @@ const ValidationReportViewer = ({ data, onClose }: ValidationReportViewerProps) 
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Overall Score</p>
+                <p className="text-sm font-medium text-muted-foreground">summaC Score</p>
                 <p className="text-2xl font-bold text-foreground">{(data.summac_score * 100).toFixed(1)}%</p>
               </div>
               <BarChart3 className="w-8 h-8 text-primary" />
@@ -262,7 +268,25 @@ const ValidationReportViewer = ({ data, onClose }: ValidationReportViewerProps) 
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Max Intent Score</p>
-              <ScoreBadge score={data.intent_scores.max_reranker_score} />
+              {(() => {
+                const embeddingScore = data.intent_scores.max_embedding_score;
+                const rerankerScore = data.intent_scores.max_reranker_score;
+                if (embeddingScore >= rerankerScore) {
+                  return (
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Embedding</span>
+                      <ScoreBadge score={embeddingScore} />
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Reranker</span>
+                      <ScoreBadge score={rerankerScore} />
+                    </div>
+                  );
+                }
+              })()}
             </div>
           </div>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -280,6 +304,61 @@ const ValidationReportViewer = ({ data, onClose }: ValidationReportViewerProps) 
           </div>
         </CardContent>
       </Card>
+
+      {/* User Prompt, SQL Facts Extracted, and LLM Summary Generated side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+        {/* User Prompt Card */}
+        <Card className="h-full flex flex-col">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              <span className="font-semibold">User Prompt</span>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1">
+            <div className="text-sm">{data.user_prompt}</div>
+          </CardContent>
+        </Card>
+        {/* SQL Facts Card */}
+        <Card className="h-full flex flex-col">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span className="font-semibold">SQL Facts Extracted</span>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1">
+            {Array.isArray(data.sql_facts_extracted) ? (
+              <ul className="list-disc pl-5 text-sm">
+                {data.sql_facts_extracted.map((fact, idx) => (
+                  <li key={idx}>{fact}</li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-sm">{data.sql_facts_extracted}</div>
+            )}
+          </CardContent>
+        </Card>
+        {/* LLM Summary Card */}
+        <Card className="h-full flex flex-col">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span className="font-semibold">LLM Summary Generated</span>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-auto max-h-72">
+            <pre className="whitespace-pre-line text-xs font-mono">
+              {data.llm_summary_generated &&
+                data.llm_summary_generated
+                  .replace(/\n{2,}/g, '\n')
+                  .replace(/Rights Summary:/g, '\nRights Summary:\n')
+                  .replace(/Terms Summary:/g, '\nTerms Summary:\n')
+              }
+            </pre>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Detailed Sections - Collapsible */}
       {detailsExpanded && (
@@ -305,7 +384,7 @@ const ValidationReportViewer = ({ data, onClose }: ValidationReportViewerProps) 
                     </tr>
                   </thead>
                   <tbody>
-                    {data.qa_results.map((item, index) => (
+                    {data.qa_results.filter(item => item.qa_answer && item.qa_answer.trim() !== "").map((item, index) => (
                       <tr key={index} className="border-b border-border hover:bg-muted/50">
                         <td className="p-3 font-medium">{item.fact}</td>
                         <td className="p-3 text-muted-foreground">{item.question}</td>
@@ -406,17 +485,49 @@ const ValidationReportViewer = ({ data, onClose }: ValidationReportViewerProps) 
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="border-b border-border">
-                          <th className="text-left p-3 font-semibold">Key</th>
-                          <th className="text-left p-3 font-semibold">Value</th>
+                          <th className="text-left p-3 font-semibold">Field</th>
+                          <th className="text-left p-3 font-semibold">Actual Value</th>
+                          <th className="text-left p-3 font-semibold">Expected Value</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {data.exact_missing.map((item, index) => (
-                          <tr key={index} className="border-b border-border hover:bg-muted/50">
-                            <td className="p-3 font-medium">{item[0]}</td>
-                            <td className="p-3 text-muted-foreground">{item[2]}</td>
-                          </tr>
-                        ))}
+                        {data.exact_missing.map((item, index) => {
+                          // Debug: Log the item to see its structure
+                          console.log('Exact missing item:', item, 'Type:', typeof item, 'Is Array:', Array.isArray(item));
+                          
+                          // Handle different possible data structures
+                          let field, actualValue, expectedValue;
+                          
+                          if (Array.isArray(item)) {
+                            field = item[0];
+                            actualValue = item[1];
+                            expectedValue = item[2];
+                          } else if (typeof item === 'object' && item !== null) {
+                            // If it's an object with key-value pairs
+                            field = Object.keys(item)[0];
+                            actualValue = item[field];
+                            expectedValue = item[field]; // For object format, we might need to adjust this
+                          } else {
+                            // Fallback for any other format
+                            field = String(item);
+                            actualValue = 'Unknown';
+                            expectedValue = 'Unknown';
+                          }
+                          
+                          return (
+                            <tr key={index} className="border-b border-border hover:bg-muted/50">
+                              <td className="p-3 font-medium">{String(field)}</td>
+                              <td className="p-3 text-muted-foreground">
+                                {actualValue === null || actualValue === undefined ? (
+                                  <Badge variant="outline" className="text-danger">Missing</Badge>
+                                ) : (
+                                  String(actualValue)
+                                )}
+                              </td>
+                              <td className="p-3 text-success-foreground font-medium">{String(expectedValue)}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -439,17 +550,49 @@ const ValidationReportViewer = ({ data, onClose }: ValidationReportViewerProps) 
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="border-b border-border">
-                          <th className="text-left p-3 font-semibold">Key</th>
-                          <th className="text-left p-3 font-semibold">Value</th>
+                          <th className="text-left p-3 font-semibold">Field</th>
+                          <th className="text-left p-3 font-semibold">Actual Value</th>
+                          <th className="text-left p-3 font-semibold">Expected Value</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {data.fuzzy_missing.map((item, index) => (
-                          <tr key={index} className="border-b border-border hover:bg-muted/50">
-                            <td className="p-3 font-medium">{item[0]}</td>
-                            <td className="p-3 text-muted-foreground">{item[2]}</td>
-                          </tr>
-                        ))}
+                        {data.fuzzy_missing.map((item, index) => {
+                          // Debug: Log the item to see its structure
+                          console.log('Fuzzy missing item:', item, 'Type:', typeof item, 'Is Array:', Array.isArray(item));
+                          
+                          // Handle different possible data structures
+                          let field, actualValue, expectedValue;
+                          
+                          if (Array.isArray(item)) {
+                            field = item[0];
+                            actualValue = item[1];
+                            expectedValue = item[2];
+                          } else if (typeof item === 'object' && item !== null) {
+                            // If it's an object with key-value pairs
+                            field = Object.keys(item)[0];
+                            actualValue = item[field];
+                            expectedValue = item[field]; // For object format, we might need to adjust this
+                          } else {
+                            // Fallback for any other format
+                            field = String(item);
+                            actualValue = 'Unknown';
+                            expectedValue = 'Unknown';
+                          }
+                          
+                          return (
+                            <tr key={index} className="border-b border-border hover:bg-muted/50">
+                              <td className="p-3 font-medium">{String(field)}</td>
+                              <td className="p-3 text-muted-foreground">
+                                {actualValue === null || actualValue === undefined ? (
+                                  <Badge variant="outline" className="text-danger">Missing</Badge>
+                                ) : (
+                                  String(actualValue)
+                                )}
+                              </td>
+                              <td className="p-3 text-success-foreground font-medium">{String(expectedValue)}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
