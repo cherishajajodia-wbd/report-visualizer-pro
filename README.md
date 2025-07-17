@@ -7,15 +7,7 @@ A modern web application built with Vite, React, TypeScript, shadcn-ui, and Tail
 ## Table of Contents
 
 - [Project Info](#project-info)
-- [How to Edit This Code](#how-to-edit-this-code)
-  - [Clone and Edit Locally](#clone-and-edit-locally)
-  - [Technologies Used](#technologies-used)
-  - [How to Deploy](#how-to-deploy)
-  - [Edit Files Directly on GitHub](#edit-files-directly-on-github)
-  - [Use GitHub Codespaces (Optional)](#use-github-codespaces-optional)
-
----
-
+- [How to Edit This Code]
 ## Project Info
 
 Report Visualizer Pro is a project that allows you to upload your result JSON file, summarizes the data, and displays it in a dashboard with various insightful parameters. It’s designed to make your data easy to explore and understand with interactive visualizations.
